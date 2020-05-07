@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+			.cell {
+				height: 100px;
+				width: 100px;
+				border: 1px solid black;
+				text-align: center;
+				font-size: 32px;
+				line-height: 100px;
+			}
+			.container {
+				display: flex;
+			}
+			.wrapper {
+				position: relative;
+				left: 500px;
+				top: 100px;
+			}
+			.siva {
+				background-color: #CCC;
+			}
+			.poruka {
+				display: none;
+				background-color:#2C8437;
+				position: absolute;
+				top: 120px;
+				left: 40px;
+				height: 55px;
+				width: 200px;
+				font-size: 30px;
+				text-align: center;
+				border: 1px solid black;
+			}
+			#restart-btn {
+				position: relative;
+				left: 50%;
+			}
+		</style>
+		<meta charset="utf-8">
+	</head>
+	<body>
+		<button id="restart-btn" onclick="test();">Restart</button>
+		<div class="wrapper" id="igra">
+			<div class="container">
+				<div class="cell" onclick="kordinati(0,0)"></div>
+				<div class="cell" onclick="kordinati(0,1)"></div>
+				<div class="cell" onclick="kordinati(0,2)"></div>
+			</div>
+			<div class="container">
+				<div class="cell" onclick="kordinati(1,0)"></div>
+				<div class="cell" onclick="kordinati(1,1)"></div>
+				<div class="cell" onclick="kordinati(1,2)"></div>
+			</div>
+			<div class="container">
+				<div class="cell" onclick="kordinati(2,0)"></div>
+				<div class="cell" onclick="kordinati(2,1)"></div>
+				<div class="cell" onclick="kordinati(2,2)"></div>
+			</div>
+			<div class="poruka" onclick="resetuj();"></div>
+		</div>
+		<script>
+			var koIgra = 0;
+			var igraUtoku = true;
+			var stanje = [
+				[null, null, null],
+				[null, null, null],
+				[null, null, null]
+			];
+			
+			function upisi(x,y,sta){
+				if(stanje[x][y] === null){
+					stanje[x][y] = sta;
+					sledeci();
+					return true;
+				}
+				return false;
+			}
+			
+			function sledeci(){
+				koIgra++;
+				koIgra = koIgra%2;
+			}
+			function test(){
+				resetuj();
+			}
+			function kordinati(x,y){
+				if(igraUtoku == false){
+					return;
+				}
+				if(upisi(x,y,koIgra) == true){
+					var p = proveriPobedu();
+					if(p == "X" || p == "O"){
+						igraUtoku = false;
+						if(p == "X"){
+							var igra = document.getElementById("igra");
+							igra.children[3].innerHTML = "Pobedio je X";
+							igra.children[3].style["display"] = "block";
+						}
+						if(p == "O"){
+							var igra = document.getElementById("igra");
+							igra.children[3].innerHTML = "Pobedio je O";
+							igra.children[3].style["display"] = "block";
+						}
+					}
+					prikazi();
+				}
+				
+				if(koIgra == 1){
+					setTimeout(bot, 600);
+				}
+			}
+			
+			function bot(){
+				var mogucnosti = [];
+				for(var i=0;i<3;i++){
+					for(var j=0;j<3;j++){
+						if(stanje[i][j] == null){
+							mogucnosti.push({
+								x: i,
+								y: j
+							});
+						}
+					}
+				}
+				
+				var odabir = Math.floor(Math.random()*mogucnosti.length);
+				var polje = mogucnosti[odabir];
+				kordinati(polje.x, polje.y);
+			}
+			
+			function proveriPobedu(){
+				for(var i=0; i<3; i++){
+					var p = proveriRed(i);
+					if(p == "X" || p == "O"){
+						return p;
+					}
+				}
+				for(var i=0; i<3; i++){
+					var p = proveriKolonu(i);
+					if(p == "X" || p == "O"){
+						return p;
+					}
+				}
+				return proveriDijagonalu();
+			}
+			
+			function proveriRed(red){
+				var brx = 0;
+				var bro = 0;
+				
+				for(var i=0;i<3;i++){
+					if(stanje[red][i] == 0){
+						brx++
+					}
+					if(stanje[red][i] == 1){
+						bro++
+					}
+				}
+				if(brx == 3){
+					return "X";
+				}
+				if(bro == 3){
+					return "O"
+				}
+				return null;
+			}
+			function proveriKolonu(kolona){
+				var brx = 0;
+				var bro = 0;
+					
+				for(var j=0;j<3;j++){
+					if(stanje[j][kolona] == 0){
+						brx++
+						}
+					if(stanje[j][kolona] == 1){
+						bro++
+						}
+					}
+					if(brx == 3){
+						return "X";
+					}
+					if(bro == 3){
+						return "O"
+					}
+					return null;
+			}
+			function proveriDijagonalu(){
+				var brx = 0;
+				var bro = 0;
+				
+				for(var i=0;i<3;i++){
+					if(stanje[i][i] == 0){
+						brx++
+					}
+					if(stanje[i][i] == 1){
+						bro++
+					}
+				}
+				if(brx == 3){
+					return "X";
+					}
+				if(bro == 3){
+					return "O"
+				}
+				brx = 0;
+				bro = 0;
+				
+				for(var i=0;i<3;i++){
+					if(stanje[i][i-2] == 0){
+						brx++;
+					}
+					if(stanje[i][i-2] == 1){
+						bro++
+					}
+				}
+				if(brx == 3){
+					return "X";
+					}
+				if(bro == 3){
+					return "O"
+				}
+				return null;
+			}
+			function prikazi(){
+				for(var i=0;i<3;i++){
+					for(var j=0;j<3;j++){
+						var igra = document.getElementById("igra");
+						if(stanje[i][j] == null){
+							igra.children[i].children[j].innerHTML = "";
+							if(igraUtoku == false){
+								igra.children[i].children[j].classList.add("siva");
+							}
+						}
+						if(stanje[i][j] == 0){
+							igra.children[i].children[j].innerHTML = "X";
+						}
+						if(stanje[i][j] == 1){
+							igra.children[i].children[j].innerHTML = "O";
+						}
+					}
+				}
+			}
+			
+			function resetuj(){
+				koIgra = 0;
+				igraUtoku = true;
+				stanje = [
+				[null, null, null],
+				[null, null, null],
+				[null, null, null]
+				];
+				
+				var igra = document.getElementById("igra");
+				
+				for(var i=0;i<3;i++){
+					for(var j=0;j<3;j++){
+						igra.children[i].children[j].innerHTML = "";
+						igra.children[i].children[j].className = "cell";
+					}
+				}
+				
+				igra.children[3].style = "";
+			}
+			
+			function vrstaPobede(){
+				for(var i=0;i<3;i++){
+					var p = proveriRed(i);
+					if(p == "X" || p == "O"){
+						return {
+							tip: "red",
+							broj: i
+						};
+					}
+				}
+				for(var i=0;i<3;i++){
+					var p = proveriKolonu(i);
+					if(p == "X" || p == "O"){
+						return {
+							tip: "kolona",
+							broj: i
+						};
+					}
+				}
+			}
+			
+		</script>
+	</body>
+</html>
